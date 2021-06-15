@@ -1,4 +1,5 @@
-﻿using System.Collections;
+//allows me to create places objects with values
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
