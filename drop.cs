@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -11,11 +11,13 @@ public class drop : MonoBehaviour
     public Text selected;
     private rewrite2 toiletting;
 
+    //adds the options to the list of items (main menu)
     void Start()
     {
         drop_menu.GetComponent<Dropdown>().AddOptions(listofitems);
     }
 
+    //assigns the start location to the navigation 
     public void startloca()
     {
         place plc = GameObject.Find(selected.text).GetComponent<place>();
@@ -25,7 +27,7 @@ public class drop : MonoBehaviour
         GameObject.Find("nav").GetComponent<TrailRenderer>().Clear();
         GameObject.Find("Canvas").GetComponent<overall>().start_selected();
     }
-
+    // assigns the end locatino to the navigation
     public void endlocation()
     {
         if (selected.text == "F Toilet")
@@ -47,17 +49,3 @@ public class drop : MonoBehaviour
         }
     }
 }
-
-/*
-public void endloc()
-{
-    place plc = GameObject.Find(selected.text).GetComponent<place>();
-    GameObject.Find("nav").GetComponent<rewrite2>().go_to = plc;
-    if (selected.text == "Female toilet")
-    {
-        GameObject.Find("nav").GetComponent<rewrite2>().closest_toilet();
-    }
-    else if (selected.text == "Male toilet")
-    {
-        GameObject.Find("nav").GetComponent<rewrite2>().closest_toilet();
-    }*/
