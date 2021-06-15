@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -10,6 +10,8 @@ public class selection : MonoBehaviour
     public GameObject primary_building;
     public GameObject centre_building;
     public GameObject sec_building;
+
+    //shows buildings that have been selected in the menu
     public void select_building()
     {
         if(selected.text == "Art building")
