@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using System;
 using UnityEngine;
@@ -10,22 +10,22 @@ public class rewrite2 : MonoBehaviour
     public GameObject[] centre;
     public GameObject[] secondary;
 
-    public Vector3[] waypoints;
-    public List<int> ignore = new List<int>();
-
-    public place go_to;
-    public place start_loc;
-
-    public bool move;
-    public Vector3 move_to;
-
-    public Vector3 currentdest;
-
     public place[] Mtoilets;
     public place[] Ftoilets;
 
-    public bool beginmove;
+    public Vector3[] waypoints;
+    public List<int> ignore = new List<int>();
 
+    //start and end locations
+    public place go_to;
+    public place start_loc;
+    //location nav should move to next
+    public bool move;
+    public Vector3 move_to;
+    public Vector3 current_target;
+
+
+    //to find the closes toilet
     public void closest_toilet(place[] toilets)
     {
         float smallest = cost(toilets[0].coord);
@@ -43,10 +43,13 @@ public class rewrite2 : MonoBehaviour
         go_to = closest;
         Debug.Log(closest.coord);
     }
+    //Algorithm which assigns staircases to go to and to move to the destination
     public IEnumerator MoveTo()
     {
+        //if statement if the locations are not in the same building
         if (go_to.building != start_loc.building)
         {
+            //if the location is in the centre
             if (go_to.building == "centre")
             {
                 if (start_loc.building == "sec")
@@ -54,112 +57,70 @@ public class rewrite2 : MonoBehaviour
                     if (start_loc.floor != 2)
                     {
                         targetassign(secondary[start_loc.floor]);
-                        currentdest = waypoints[0];
-                        while (move_to != waypoints[0])
-                        {
-                            closest();
-                            yield return new WaitForSeconds(0.1f);
-                            transform.position = move_to;
-                        }
-                        targetassign(secondary[2]);
-                        transform.position = waypoints[0];
-                        ignore.Clear();
+                        StartCoroutine(moveish(waypoints[0]));
                     }
-
-                    // go to front of sec building
+                    yield return new WaitForSeconds(2f);
                     targetassign(secondary[2]);
-                    currentdest = waypoints[1];
-                    while (move_to != waypoints[1])
-                    {
-                        closest();
-                        yield return new WaitForSeconds(0.1f);
-                        transform.position = move_to;
-                    }
-                    yield return new WaitForSeconds(0.1f);
-                    ignore.Clear();
+                    transform.position = waypoints[0];
+                    StartCoroutine(moveish(waypoints[0]));
 
-                    if (go_to.floor == 2)
-                    {
-                        targetassign(mainbuilding[1]);
-                        currentdest = waypoints[1];
-                        while (move_to != waypoints[1])
-                        {
-                            closest();
-                            yield return new WaitForSeconds(0.1f);
-                            transform.position = move_to;
-                        }
-                        targetassign(centre[go_to.floor]);
-                        transform.position = waypoints[0];
-                        ignore.Clear();
-                        currentdest = go_to.coord;
-                        while (move_to != go_to.coord)
-                        {
-                            closest();
-                            yield return new WaitForSeconds(0.1f);
-                            transform.position = move_to;
-                        }
-                        ignore.Clear();
-                    }
+                    yield return new WaitForSeconds(2f);
+                    targetassign(mainbuilding[1]);
+                    transform.position = waypoints[3];
+                    StartCoroutine(moveish(waypoints[1]));
+
+                    yield return new WaitForSeconds(2f);
+                    targetassign(centre[2]);
+                    transform.position = waypoints[1];
+                    StartCoroutine(moveish(go_to.coord));
                 }
-                if (start_loc.building == "main")
+                if ((start_loc.building == "main") && (start_loc.middle == true))
                 {
-                    if (start_loc.floor == 0 || start_loc.floor == 1)
+                    targetassign(mainbuilding[start_loc.floor]);
+                    StartCoroutine(moveish(waypoints[1]));
+                    yield return new WaitForSeconds(2f);
+
+                    targetassign(centre[2]);
+                    transform.position = waypoints[1];
+
+                    yield return new WaitForSeconds(2f);
+                    targetassign(centre[2]);
+                    transform.position = waypoints[1];
+                    StartCoroutine(moveish(go_to.coord));
+                }
+                else if ((start_loc.building == "main") && (start_loc.middle == false))
+                {
+                    if (start_loc.floor < 2)
                     {
                         targetassign(mainbuilding[start_loc.floor]);
-                        currentdest = waypoints[0];
-                        while (move_to != waypoints[0])
-                        {
-                            closest();
-                            yield return new WaitForSeconds(0.1f);
-                            transform.position = move_to;
-                        }
-                        targetassign(mainbuilding[go_to.floor]);
-                        transform.position = waypoints[0];
-                        ignore.Clear();
-                        currentdest = go_to.coord;
-                        while (move_to != waypoints[0])
-                        {
-                            closest();
-                            yield return new WaitForSeconds(0.1f);
-                            transform.position = move_to;
-                        }
-                        ignore.Clear();
-                    }
-                    else
-                    {
-                        targetassign(mainbuilding[start_loc.floor]);
-                        currentdest = waypoints[0];
-                        while (move_to != waypoints[0])
-                        {
-                            closest();
-                            yield return new WaitForSeconds(0.1f);
-                            transform.position = move_to;
-                        }
-                        targetassign(mainbuilding[1]);
-                        transform.position = waypoints[0];
-                        ignore.Clear();
-                        currentdest = waypoints[1];
-                        while (move_to != waypoints[1])
-                        {
-                            closest();
-                            yield return new WaitForSeconds(0.1f);
-                            transform.position = move_to;
-                        }
+                        StartCoroutine(moveish(waypoints[1]));
+
+                        yield return new WaitForSeconds(2f);
                         targetassign(centre[2]);
-                        transform.position = waypoints[0];
-                        ignore.Clear();
-                        currentdest = go_to.coord;
-                        while (move_to != go_to.coord)
-                        {
-                            closest();
-                            yield return new WaitForSeconds(0.1f);
-                            transform.position = move_to;
-                        }
-                        ignore.Clear();
+                        transform.position = waypoints[1];
+                        yield return new WaitForSeconds(2f);
+                        StartCoroutine(moveish(go_to.coord));
                     }
+                    else if (start_loc.floor >= 2)
+                    {
+                        targetassign(mainbuilding[start_loc.floor]);
+                        StartCoroutine(moveish(waypoints[0]));
+
+                        yield return new WaitForSeconds(2f);
+                        targetassign(mainbuilding[0]);
+                        transform.position = waypoints[0];
+                        StartCoroutine(moveish(waypoints[1]));
+
+                        yield return new WaitForSeconds(2f);
+                        targetassign(centre[2]);
+                        transform.position = waypoints[1];
+                        yield return new WaitForSeconds(2f);
+                        StartCoroutine(moveish(go_to.coord));
+                    }
+                    
                 }
             }
-
+            //if the location is in the main building
             if (go_to.building == "main")
             {
                 if (start_loc.building == "sec")
@@ -167,384 +128,225 @@ public class rewrite2 : MonoBehaviour
                     if (start_loc.floor != 2)
                     {
                         targetassign(secondary[start_loc.floor]);
-                        currentdest = waypoints[0];
-                        while (move_to != waypoints[0])
-                        {
-                            closest();
-                            yield return new WaitForSeconds(0.1f);
-                            transform.position = move_to;
-                        }
-                        targetassign(secondary[2]);
-                        transform.position = waypoints[0];
-                        ignore.Clear();
+                        StartCoroutine(moveish(waypoints[0]));
+                        yield return new WaitForSeconds(2f);
                     }
-
-                    // go to front of sec building
                     targetassign(secondary[2]);
-                    currentdest = waypoints[1];
-                    while (move_to != waypoints[1])
-                    {
-                        closest();
-                        yield return new WaitForSeconds(0.1f);
-                        transform.position = move_to;
-                    }
-                    yield return new WaitForSeconds(0.1f);
-                    ignore.Clear();
-
-
+                    StartCoroutine(moveish(waypoints[1]));
+                    yield return new WaitForSeconds(2f);
 
                     if (go_to.floor == 1)
                     {
                         targetassign(mainbuilding[go_to.floor]);
-                        currentdest = go_to.coord;
-                        while (move_to != go_to.coord)
-                        {
-                            closest();
-                            yield return new WaitForSeconds(0.1f);
-                            transform.position = move_to;
-                        }
-                        transform.position = go_to.coord;
-                        ignore.Clear();
+                        StartCoroutine(moveish(go_to.coord));
                     }
                     else if (go_to.floor == 0)
                     {
                         targetassign(mainbuilding[1]);
-                        currentdest = waypoints[1];
-                        while (move_to != waypoints[1])
-                        {
-                            closest();
-                            yield return new WaitForSeconds(0.1f);
-                            transform.position = move_to;
-                        }
+                        StartCoroutine(moveish(waypoints[1]));
+                        yield return new WaitForSeconds(2f);
+
                         targetassign(mainbuilding[go_to.floor]);
                         transform.position = waypoints[1];
-                        ignore.Clear();
-                        currentdest = go_to.coord;
-                        while (move_to != go_to.coord)
-                        {
-                            closest();
-                            yield return new WaitForSeconds(0.1f);
-                            transform.position = move_to;
-                        }
-                        ignore.Clear();
+                        yield return new WaitForSeconds(2f);
+                        StartCoroutine(moveish(go_to.coord));
+
                     }
                     else if (go_to.floor > 1)
                     {
                         targetassign(mainbuilding[1]);
-                        currentdest = waypoints[0];
-                        while (move_to != waypoints[0])
-                        {
-                            closest();
-                            yield return new WaitForSeconds(0.1f);
-                            transform.position = move_to;
-                        }
-                        transform.position = waypoints[0];
+                        StartCoroutine(moveish(waypoints[0]));
+                        yield return new WaitForSeconds(7f);
 
                         targetassign(mainbuilding[go_to.floor]);
                         transform.position = waypoints[0];
-                        ignore.Clear();
-                        currentdest = go_to.coord;
-                        while (move_to != go_to.coord)
-                        {
-                            closest();
-                            yield return new WaitForSeconds(0.1f);
-                            transform.position = move_to;
-                        }
-                        ignore.Clear();
-                    }
-
-                    if (start_loc.building == "centre")
-                    {
-                        targetassign(centre[2]);
-                        currentdest = waypoints[0];
-                        while (move_to != waypoints[0])
-                        {
-                            closest();
-                            yield return new WaitForSeconds(0.1f);
-                            transform.position = move_to;
-                        }
-                        transform.position = waypoints[0];
-                        targetassign(mainbuilding[1]);
-                        ignore.Clear();
-                        transform.position = waypoints[1];
-
-                        if (go_to.floor == 1)
-                        {
-                            currentdest = go_to.coord;
-                            while (move_to != go_to.coord)
-                            {
-                                closest();
-                                yield return new WaitForSeconds(0.1f);
-                                transform.position = move_to;
-                            }
-                            ignore.Clear();
-                        }
-                        else
-                        {
-                            currentdest = waypoints[0];
-                            while (move_to != waypoints[0])
-                            {
-                                closest();
-                                yield return new WaitForSeconds(0.1f);
-                                transform.position = move_to;
-                            }
-                            ignore.Clear();
-                            targetassign(mainbuilding[go_to.floor]);
-                            transform.position = waypoints[0];
-
-                            currentdest = go_to.coord;
-                            while (move_to != go_to.coord)
-                            {
-                                closest();
-                                yield return new WaitForSeconds(0.1f);
-                                transform.position = move_to;
-                            }
-                            ignore.Clear();
-
-                            currentdest = waypoints[0];
-                        }
-                    }
-
-                }
-        
-                if (go_to.building == "sec")
-                {
-                    if(start_loc.building == "center")
-                    {
-                        targetassign(centre[2]);
-                        currentdest = waypoints[0];
-                        while (move_to != waypoints[0])
-                        {
-                            closest();
-                            yield return new WaitForSeconds(0.1f);
-                            transform.position = move_to;
-                        }
-                        transform.position = waypoints[0];
-                        targetassign(mainbuilding[1]);
-                        ignore.Clear();
-                        transform.position = waypoints[1];
-
-
-                        currentdest = waypoints[3];
-                        while (move_to != waypoints[3])
-                        {
-                            closest();
-                            yield return new WaitForSeconds(0.1f);
-                            transform.position = move_to;
-                        }
-                        ignore.Clear();
-
-                        if (go_to.floor == 2)
-                        {
-                            targetassign(secondary[2]);
-                            currentdest = go_to.coord;
-                            while (move_to != go_to.coord)
-                            {
-                                closest();
-                                yield return new WaitForSeconds(0.1f);
-                                transform.position = move_to;
-                            }
-                            ignore.Clear();
-                        }
-                        else
-                        {
-                            targetassign(secondary[2]);
-                            currentdest = waypoints[0];
-                            while (move_to != waypoints[0])
-                            {
-                                closest();
-                                yield return new WaitForSeconds(0.1f);
-                                transform.position = move_to;
-                            }
-                            transform.position = waypoints[0];
-                            ignore.Clear();
-
-                            targetassign(secondary[go_to.floor]);
-                            transform.position = waypoints[0];
-
-                            currentdest = go_to.coord;
-                            while (move_to != go_to.coord)
-                            {
-                                closest();
-                                yield return new WaitForSeconds(0.1f);
-                                transform.position = move_to;
-                            }
-                            transform.position = go_to.coord;
-                        }
+                        StartCoroutine(moveish(go_to.coord));
                     }
                 }
 
-                if (start_loc.building == "main")
+                if ((start_loc.building == "centre"))
                 {
-                    targetassign(secondary[start_loc.floor]);
-                    currentdest = waypoints[0];
-                    while (move_to != waypoints[0])
-                    {
-                        closest();
-                        yield return new WaitForSeconds(0.1f);
-                        transform.position = move_to;
-                    }
-                    transform.position = waypoints[0];
-                    ignore.Clear();
+                    targetassign(centre[2]);
+                    StartCoroutine(moveish(waypoints[1]));
+                    yield return new WaitForSeconds(2f);
 
-
-                    targetassign(secondary[1]);
-                    transform.position = waypoints[0];
-                    currentdest = waypoints[3];
-                    while (move_to != waypoints[3])
+                    if (go_to.floor < 2)
                     {
-                        closest();
-                        yield return new WaitForSeconds(0.1f);
-                        transform.position = move_to;
+                        targetassign(mainbuilding[go_to.floor]);
+                        transform.position = (waypoints[1]);
+                        yield return new WaitForSeconds(2f);
+                        StartCoroutine(moveish(go_to.coord));
                     }
-                    transform.position = waypoints[3];
-                    ignore.Clear();
+                    else if (go_to.floor >= 2)
+                    {
+                        targetassign(mainbuilding[1]);
+                        StartCoroutine(moveish(waypoints[0]));
+                        yield return new WaitForSeconds(5f);
+
+                        targetassign(mainbuilding[go_to.floor]);
+                        StartCoroutine(moveish(go_to.coord));
+                    }
+                }
+            }
+            //if the location is in the secondary building
+            if (go_to.building == "sec")
+            {
+                if (start_loc.building == "centre")
+                {
+                    targetassign(centre[2]);
+                    StartCoroutine(moveish(waypoints[1]));
+                    yield return new WaitForSeconds(2f);
+
+                    targetassign(mainbuilding[1]);
+                    transform.position = waypoints[1];
+                    yield return new WaitForSeconds(2f);
+                    StartCoroutine(moveish(waypoints[3]));
+                    yield return new WaitForSeconds(2f);
+                }
+
+                if ((start_loc.building == "main"))
+                {
+                    if (start_loc.floor == 1)
+                    {
+                        targetassign(mainbuilding[start_loc.floor]);
+                        StartCoroutine(moveish(waypoints[3]));
+                        yield return new WaitForSeconds(5f);
+                    }
+                    else if (start_loc.floor == 0)
+                    {
+                        targetassign(mainbuilding[0]);
+                        StartCoroutine(moveish(waypoints[1]));
+                        yield return new WaitForSeconds(2f);
+
+                        targetassign(mainbuilding[1]);
+                        transform.position = waypoints[1];
+                        yield return new WaitForSeconds(2f);
+
+                        StartCoroutine(moveish(waypoints[3]));
+                        yield return new WaitForSeconds(5f);
+                    }
+                    else if (start_loc.floor >= 2)
+                    {
+                        targetassign(mainbuilding[start_loc.floor]);
+                        StartCoroutine(moveish(waypoints[0]));
+                        yield return new WaitForSeconds(2f);
+
+                        targetassign(centre[1]);
+                        transform.position = waypoints[0];
+                        yield return new WaitForSeconds(2f);
+
+                        StartCoroutine(moveish(waypoints[3]));
+                        yield return new WaitForSeconds(5f);
+                    }
 
                     if (go_to.floor == 2)
                     {
                         targetassign(secondary[2]);
-                        currentdest = go_to.coord;
-                        while (move_to != go_to.coord)
-                        {
-                            closest();
-                            yield return new WaitForSeconds(0.1f);
-                            transform.position = move_to;
-                        }
-                        ignore.Clear();
+                        StartCoroutine(moveish(go_to.coord));
+                        yield return new WaitForSeconds(2f);
                     }
                     else
                     {
                         targetassign(secondary[2]);
-                        currentdest = waypoints[0];
-                        while (move_to != waypoints[0])
-                        {
-                            closest();
-                            yield return new WaitForSeconds(0.1f);
-                            transform.position = move_to;
-                        }
-                        transform.position = waypoints[0];
-                        ignore.Clear();
+                        StartCoroutine(moveish(waypoints[0]));
+                        yield return new WaitForSeconds(2f);
 
                         targetassign(secondary[go_to.floor]);
                         transform.position = waypoints[0];
-
-                        currentdest = go_to.coord;
-                        while (move_to != go_to.coord)
-                        {
-                            closest();
-                            yield return new WaitForSeconds(0.1f);
-                            transform.position = move_to;
-                        }
-                        transform.position = go_to.coord;
+                        StartCoroutine(moveish(go_to.coord));
                     }
-
                 }
-            }
+                }
         }
-        if(go_to.building == start_loc.building)
+        //if the locations are in the same building
+        if (go_to.building == start_loc.building)
         {
-            if(go_to.building == "main")
+            // if the locations are in the main building
+            if (go_to.building == "main")
             {
-                if(go_to.floor != start_loc.floor)
+                if(start_loc.middle == true && go_to.middle == true)
                 {
                     targetassign(mainbuilding[start_loc.floor]);
-                    currentdest = waypoints[0];
-                    while (move_to != waypoints[0])
-                    {
-                        closest();
-                        yield return new WaitForSeconds(0.1f);
-                        transform.position = move_to;
-                    }
-                    yield return new WaitForSeconds(0.1f);
-                    targetassign(mainbuilding[go_to.floor]);
-                    transform.position = waypoints[0];
-                    ignore.Clear();
+                    StartCoroutine(moveish(waypoints[1]));
+                    yield return new WaitForSeconds(2f);
 
-                    currentdest = go_to.coord;
-                    while (move_to != go_to.coord)
-                    {
-                        closest();
-                        yield return new WaitForSeconds(0.1f);
-                        transform.position = move_to;
-                    }
-                    transform.position = go_to.coord;
-                    ignore.Clear();
+                    targetassign(mainbuilding[go_to.floor]);
+                    transform.position = waypoints[1];
+                    StartCoroutine(moveish(go_to.coord));
                 }
                 else
                 {
-                    targetassign(mainbuilding[start_loc.floor]);
-                    currentdest = go_to.coord;
-                    while (move_to != go_to.coord)
+                    if (go_to.floor != start_loc.floor)
                     {
-                        closest();
-                        yield return new WaitForSeconds(0.1f);
-                        transform.position = move_to;
+                        targetassign(mainbuilding[start_loc.floor]);
+                        StartCoroutine(moveish(waypoints[0]));
+                        targetassign(mainbuilding[go_to.floor]);
+                        transform.position = waypoints[0];
+
+                        StartCoroutine(moveish(go_to.coord));
                     }
-                    transform.position = go_to.coord;
-                    ignore.Clear();
+                    else
+                    {
+                        targetassign(mainbuilding[start_loc.floor]);
+                        StartCoroutine(moveish(go_to.coord));
+                        transform.position = go_to.coord;
+                    }
                 }
+                
             }
+            //if the locations are in the centre building
             if (go_to.building == "centre")
             {
                 targetassign(centre[start_loc.floor]);
-                currentdest = go_to.coord;
-                while (move_to != go_to.coord)
-                {
-                    closest();
-                    yield return new WaitForSeconds(0.1f);
-                    transform.position = move_to;
-                }
-                transform.position = go_to.coord;
-                ignore.Clear();
+                StartCoroutine(moveish(go_to.coord));
             }
+            // if the locations are in the secondary building
             if (go_to.building == "sec")
             {
                 if (go_to.floor != start_loc.floor)
                 {
                     targetassign(secondary[start_loc.floor]);
-                    currentdest = waypoints[0];
-                    while (move_to != waypoints[0])
-                    {
-                        closest();
-                        yield return new WaitForSeconds(0.1f);
-                        transform.position = move_to;
-                    }
+                    StartCoroutine(moveish(waypoints[0]));
                     yield return new WaitForSeconds(0.1f);
                     transform.position = waypoints[0];
                     ignore.Clear();
 
-                    targetassign(mainbuilding[go_to.floor]);
+                    targetassign(secondary[go_to.floor]);
                     transform.position = waypoints[0];
 
-                    currentdest = go_to.coord;
-                    while (move_to != go_to.coord)
-                    {
-                        closest();
-                        yield return new WaitForSeconds(0.1f);
-                        transform.position = move_to;
-                    }
+                    StartCoroutine(moveish(go_to.coord));
                     yield return new WaitForSeconds(0.1f);
                     transform.position = go_to.coord;
-                    ignore.Clear();
                 }
                 else
                 {
-                    targetassign(mainbuilding[go_to.floor]);
-                    currentdest = go_to.coord;
-                    while (move_to != go_to.coord)
-                    {
-                        closest();
-                        yield return new WaitForSeconds(0.1f);
-                        transform.position = move_to;
-                    }
+                    targetassign(secondary[go_to.floor]);
+                    StartCoroutine(moveish(go_to.coord));
                     yield return new WaitForSeconds(0.1f);
                     transform.position = go_to.coord;
-                    ignore.Clear();
                 }
             }
         }
     }
 
+    //algorithm to get to the current target assigned
+    public IEnumerator moveish(Vector3 coord)
+    {
+        current_target = coord;
+        ignore.Clear();
+        closest();
+        while (move_to != coord)
+        {
+            closest();
+            yield return new WaitForSeconds(0.1f);
+            transform.position = move_to;
+        }
+        yield return new WaitForSeconds(0.1f);
+        transform.position = move_to;
+        ignore.Clear();
+    }
+
+    //reassigns new waypoints to the waypoints array
     public void targetassign(GameObject holder)
     {
         Array.Resize(ref waypoints, holder.transform.childCount);
@@ -554,11 +356,12 @@ public class rewrite2 : MonoBehaviour
         }
     }
 
+    // finds the closest node using the dijkstra algorithm by calculating h cost, g cost and f cost
     public void closest()
     {
-        if (transform.position != currentdest)
+        if (transform.position != current_target)
         {
-            float hcost = cost(currentdest);
+            float hcost = cost(current_target);
             float smallest = 1000;
             int pos = 0;
             for (int i = 0; i < waypoints.Length; i++)
@@ -579,6 +382,7 @@ public class rewrite2 : MonoBehaviour
         }
     }
 
+    //find the cost of the position passed into the subroutine
     public float cost(Vector3 node)
     {
         float x;
@@ -590,3 +394,4 @@ public class rewrite2 : MonoBehaviour
         return Mathf.Sqrt(Mathf.Pow(x, 2) + Mathf.Pow(y, 2));
     }
 }
+
