@@ -17,41 +17,10 @@ public class movment : MonoBehaviour
 
     void Update()
     {
-        /*
-
-        if (Input.GetKeyDown(KeyCode.Return))
-        {
-            if(current +2 > locations.Length)
-            {
-                current = 0;
-            }
-            else
-            {
-                current++;
-            }
-            transform.position = (locations[current].position);
-            transform.rotation = locations[current].rotation;
-            
-            for (int i = 0; i < locations.Length; i++)
-            {
-                if (gameObject.transform == locations[i])
-                {
-                    current = i;
-                    break;
-                }
-            }
-            transform.position = (locations[current + 1].position);
-            
-        }
-        
-        if (Input.GetAxisRaw("Vertical") != 0)
-        {
-            transform.position += moveSpeed * new Vector3(Input.GetAxisRaw("Vertical")*-1, 0, 0);
-        }
-        */
+        //movement scripts for the user
         Vector3 rotation = transform.eulerAngles;
         
-        rotation.y += Input.GetAxis("Horizontal") * -moveSpeed * Time.deltaTime; // Standart Left-/Right Arrows and A & D Keys
+        rotation.y += Input.GetAxis("Horizontal") * -moveSpeed * Time.deltaTime; // Standard Left-/Right Arrows and A & D Keys
         transform.eulerAngles = rotation;
         float scroll = Input.GetAxis("Mouse ScrollWheel");
         Zoom(scroll, MouseZoomSpeed);
@@ -69,3 +38,4 @@ public class movment : MonoBehaviour
     }
 
 }
+
