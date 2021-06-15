@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -10,7 +10,7 @@ public class on_click : MonoBehaviour
     public GameObject end;
     public GameObject button;
 
-
+    //hides the objects on the screen when user presses start
     public void begin()
     {
         StartCoroutine(GameObject.Find("nav").GetComponent<rewrite2>().MoveTo());
@@ -19,6 +19,7 @@ public class on_click : MonoBehaviour
 
     }
 
+    //assigns all the start locations and end locations to the rewrite2 script
     public void startloca()
     {
         place plc = GameObject.Find(selected.text).GetComponent<place>();
@@ -28,23 +29,5 @@ public class on_click : MonoBehaviour
         start.SetActive(false);
         end.SetActive(false);
     }
-    /*
-
-    public void endloc()
-    {
-        if(selected.text == "Female toilet")
-        {
-            GameObject.Find("nav").GetComponent<rewrite2>().closest_toilet();
-        }
-        else if(selected.text == "Male toilet")
-        {
-            GameObject.Find("nav").GetComponent<rewrite2>().closest_toilet();
-        }
-        else
-        {
-            place plc = GameObject.Find(selected.text).GetComponent<place>();
-            GameObject.Find("nav").GetComponent<rewrite2>().go_to = plc;
-        }
-        button.SetActive(false);
-    }*/
 }
+
