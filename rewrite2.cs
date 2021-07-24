@@ -24,7 +24,10 @@ public class rewrite2 : MonoBehaviour
     public Vector3 move_to;
     public Vector3 current_target;
 
-
+    public void startpls()
+    {
+        StartCoroutine(MoveTo());
+    }
     //to find the closes toilet
     public void closest_toilet(place[] toilets)
     {
@@ -41,7 +44,6 @@ public class rewrite2 : MonoBehaviour
             }
         }
         go_to = closest;
-        Debug.Log(closest.coord);
     }
     //Algorithm which assigns staircases to go to and to move to the destination
     public IEnumerator MoveTo()
@@ -59,16 +61,14 @@ public class rewrite2 : MonoBehaviour
                         targetassign(secondary[start_loc.floor]);
                         StartCoroutine(moveish(waypoints[0]));
                     }
-                    yield return new WaitForSeconds(2f);
+                    yield return new WaitForSeconds(2);
                     targetassign(secondary[2]);
                     transform.position = waypoints[0];
                     StartCoroutine(moveish(waypoints[0]));
-
                     yield return new WaitForSeconds(2f);
                     targetassign(mainbuilding[1]);
                     transform.position = waypoints[3];
                     StartCoroutine(moveish(waypoints[1]));
-
                     yield return new WaitForSeconds(2f);
                     targetassign(centre[2]);
                     transform.position = waypoints[1];
@@ -117,7 +117,7 @@ public class rewrite2 : MonoBehaviour
                         yield return new WaitForSeconds(2f);
                         StartCoroutine(moveish(go_to.coord));
                     }
-                    
+
                 }
             }
             //if the location is in the main building
@@ -256,7 +256,7 @@ public class rewrite2 : MonoBehaviour
                         StartCoroutine(moveish(go_to.coord));
                     }
                 }
-                }
+            }
         }
         //if the locations are in the same building
         if (go_to.building == start_loc.building)
@@ -264,7 +264,7 @@ public class rewrite2 : MonoBehaviour
             // if the locations are in the main building
             if (go_to.building == "main")
             {
-                if(start_loc.middle == true && go_to.middle == true)
+                if (start_loc.middle == true && go_to.middle == true)
                 {
                     targetassign(mainbuilding[start_loc.floor]);
                     StartCoroutine(moveish(waypoints[1]));
@@ -292,7 +292,7 @@ public class rewrite2 : MonoBehaviour
                         transform.position = go_to.coord;
                     }
                 }
-                
+
             }
             //if the locations are in the centre building
             if (go_to.building == "centre")
@@ -334,15 +334,14 @@ public class rewrite2 : MonoBehaviour
     {
         current_target = coord;
         ignore.Clear();
-        closest();
         while (move_to != coord)
         {
             closest();
-            yield return new WaitForSeconds(0.1f);
+            yield return new WaitForSeconds(0.2f);
             transform.position = move_to;
         }
         yield return new WaitForSeconds(0.1f);
-        transform.position = move_to;
+        transform.position = current_target;
         ignore.Clear();
     }
 
@@ -361,18 +360,19 @@ public class rewrite2 : MonoBehaviour
     {
         if (transform.position != current_target)
         {
-            float hcost = cost(current_target);
-            float smallest = 1000;
+            float smallest = 10000;
             int pos = 0;
+            float Gcost = Vector3.Distance(current_target, gameObject.transform.position);
+
             for (int i = 0; i < waypoints.Length; i++)
             {
-                float x = (Mathf.Abs(waypoints[i][0] - transform.position[0]));
-                float y = (Mathf.Abs(waypoints[i][2] - transform.position[2]));
-                if ((hcost + cost(waypoints[i]) < smallest) && (Mathf.Sqrt(Mathf.Pow(x, 2) + Mathf.Pow(y, 2)) < 25))
+                float Hcost = Vector3.Distance(current_target, waypoints[i]);
+                Debug.Log(Gcost + Hcost);
+                if (((Gcost + Hcost) < smallest) && (Vector3.Distance(gameObject.transform.position, waypoints[i]) < 25))
                 {
                     if (!ignore.Contains(i))
                     {
-                        smallest = hcost + cost(waypoints[i]);
+                        smallest = Hcost + Gcost;
                         pos = i;
                     }
                 }
@@ -394,4 +394,3 @@ public class rewrite2 : MonoBehaviour
         return Mathf.Sqrt(Mathf.Pow(x, 2) + Mathf.Pow(y, 2));
     }
 }
-
