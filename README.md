@@ -1,4 +1,5 @@
 # Dijkstra-school-pathfinding
+
 Pathfinding solution to finding your way around school using a modified Dijkstra Algorithm
 [More information - my design portfolio](https://docs.google.com/presentation/d/1_pKWqn96okEkHfcy8EPZVZmLWTz7i6EIZMyKazftWC4/edit#slide=id.p)
 ---
